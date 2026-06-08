@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>미림여자고등학교 출결 신고서 관리</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1565C0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="출결신고서">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    main { padding: 0 0 48px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <div class="header-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <line x1="10" y1="9" x2="8" y2="9"/>
+        </svg>
+        <h1>미림여자고등학교 출결 신고서 관리</h1>
+      </div>
+      <a href="form.html" class="btn btn-white">+ 새 신고서 작성</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-total">0</div>
+        <div class="stat-label">전체 신고서</div>
+      </div>
+      <div class="stat-card stat-absent">
+        <div class="stat-number" id="stat-absent">0</div>
+        <div class="stat-label">결석</div>
+      </div>
+      <div class="stat-card stat-early">
+        <div class="stat-number" id="stat-early">0</div>
+        <div class="stat-label">조퇴</div>
+      </div>
+      <div class="stat-card stat-late">
+        <div class="stat-number" id="stat-late">0</div>
+        <div class="stat-label">지각</div>
+      </div>
+      <div class="stat-card stat-gyeolgwa">
+        <div class="stat-number" id="stat-gyeolgwa">0</div>
+        <div class="stat-label">결과</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="filters">
+        <div class="filter-group">
+          <label>학년</label>
+          <select id="filter-grade" onchange="applyFilters()">
+            <option value="">전체 학년</option>
+            <option value="1">1학년</option>
+            <option value="2">2학년</option>
+            <option value="3">3학년</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>반</label>
+          <select id="filter-class" onchange="applyFilters()">
+            <option value="">전체 반</option>
+            <option value="1">1반</option>
+            <option value="2">2반</option>
+            <option value="3">3반</option>
+            <option value="4">4반</option>
+            <option value="5">5반</option>
+            <option value="6">6반</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>유형</label>
+          <select id="filter-type" onchange="applyFilters()">
+            <option value="">전체 유형</option>
+            <option value="결석">결석</option>
+            <option value="조퇴">조퇴</option>
+            <option value="지각">지각</option>
+            <option value="결과">결과</option>
+          </select>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: flex-end;">
+          <span id="result-count" style="font-size:0.82rem; color: var(--text-muted);"></span>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="reports-table" id="reports-table">
+          <thead>
+            <tr>
+              <th>작성일</th>
+              <th>학년/반/번호</th>
+              <th>이름</th>
+              <th>유형</th>
+              <th class="hide-mobile">날짜/기간</th>
+              <th class="hide-mobile">사유</th>
+              <th>작업</th>
+            </tr>
+          </thead>
+          <tbody id="reports-body"></tbody>
+        </table>
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-icon">📋</div>
+          <p>제출된 신고서가 없습니다.</p>
+          <a href="form.html" class="btn btn-primary" style="margin-top: 14px;">첫 번째 신고서 작성하기</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-init.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function() {});
+    }
+  </script>
+</body>
+</html>

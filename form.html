@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>출결 신고서 작성 - 미림여자고등학교</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1565C0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="출결신고서">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <a href="index.html" class="btn btn-white-outline">← 목록으로</a>
+      <h1 id="page-title">출결 신고서 작성</h1>
+      <div style="width: 110px;"></div>
+    </div>
+  </header>
+
+  <main class="form-main">
+
+    <!-- 유형 선택 -->
+    <div class="card form-section">
+      <h2 class="section-title">1. 유형 선택</h2>
+      <div class="type-buttons">
+        <button type="button" class="type-btn" data-type="결석" onclick="selectType('결석')">
+          <span class="type-icon">📅</span>
+          <span>결석</span>
+        </button>
+        <button type="button" class="type-btn" data-type="조퇴" onclick="selectType('조퇴')">
+          <span class="type-icon">🚶</span>
+          <span>조퇴</span>
+        </button>
+        <button type="button" class="type-btn" data-type="지각" onclick="selectType('지각')">
+          <span class="type-icon">⏰</span>
+          <span>지각</span>
+        </button>
+        <button type="button" class="type-btn" data-type="결과" onclick="selectType('결과')">
+          <span class="type-icon">📝</span>
+          <span>결과</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 학생 정보 -->
+    <div class="card form-section">
+      <h2 class="section-title">2. 학생 정보</h2>
+      <div class="form-row four-col">
+        <div class="form-group">
+          <label for="grade">학년 <span class="required">*</span></label>
+          <select id="grade">
+            <option value="">선택</option>
+            <option value="1">1학년</option>
+            <option value="2">2학년</option>
+            <option value="3">3학년</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="classNum">반 <span class="required">*</span></label>
+          <select id="classNum">
+            <option value="">선택</option>
+            <option value="1">1반</option>
+            <option value="2">2반</option>
+            <option value="3">3반</option>
+            <option value="4">4반</option>
+            <option value="5">5반</option>
+            <option value="6">6반</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="number">번호 <span class="required">*</span></label>
+          <select id="number">
+            <option value="">선택</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="student-name">이름 <span class="required">*</span></label>
+          <input type="text" id="student-name" placeholder="이름 입력" maxlength="20">
+        </div>
+      </div>
+    </div>
+
+    <!-- 날짜/교시 (동적) -->
+    <div class="card form-section" id="date-section" style="display: none;">
+      <h2 class="section-title">3. 날짜 / 교시</h2>
+      <div id="date-content"></div>
+    </div>
+
+    <!-- 사유 -->
+    <div class="card form-section" id="reason-section" style="display: none;">
+      <h2 class="section-title">4. 사유</h2>
+      <div class="form-group">
+        <label for="reason">사유 <span class="required">*</span></label>
+        <textarea id="reason" rows="4" placeholder="사유를 입력하세요"></textarea>
+      </div>
+    </div>
+
+    <!-- 확인 날짜 -->
+    <div class="card form-section" id="confirm-section" style="display: none;">
+      <h2 class="section-title">5. 확인 날짜</h2>
+      <div class="form-group" style="max-width: 240px;">
+        <label>확인 날짜 <span class="required">*</span></label>
+        <input type="text" id="confirm-date" class="date-input" readonly
+               placeholder="달력 클릭 후 선택"
+               onclick="openCalendarFor('confirm-date', 'single', null)">
+      </div>
+    </div>
+
+    <!-- 저장/출력 버튼 -->
+    <div class="form-actions" id="form-actions" style="display: none;">
+      <button type="button" class="btn btn-primary" onclick="saveForm()">저장</button>
+      <button type="button" class="btn btn-secondary" onclick="previewPDF()">PDF 미리보기</button>
+      <button type="button" class="btn btn-outline" onclick="savePDF()">PDF 저장</button>
+    </div>
+  </main>
+
+  <!-- 달력 오버레이 -->
+  <div id="calendar-overlay" class="calendar-overlay" onclick="closeCalendar(event)" style="display: none;">
+    <div class="calendar-popup" id="calendar-popup" onclick="event.stopPropagation()">
+      <div class="calendar-header">
+        <button type="button" onclick="changeCalendarMonth(-1)">&#8249;</button>
+        <span id="cal-month-year"></span>
+        <button type="button" onclick="changeCalendarMonth(1)">&#8250;</button>
+      </div>
+      <div class="calendar-days-header">
+        <span class="sun">일</span>
+        <span>월</span><span>화</span><span>수</span><span>목</span><span>금</span>
+        <span class="sat">토</span>
+      </div>
+      <div id="cal-days" class="calendar-days"></div>
+      <div id="cal-range-hint" class="cal-range-hint" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-init.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', initForm);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function() {});
+    }
+  </script>
+</body>
+</html>
