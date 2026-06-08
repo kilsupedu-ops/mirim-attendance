@@ -37,6 +37,7 @@ function escapeHtmlNl(str) {
 
 async function getReports() {
   try {
+    await authReady;
     var snapshot = await db.collection('reports').orderBy('createdAt', 'desc').get();
     return snapshot.docs.map(function(doc) { return doc.data(); });
   } catch (e) {
@@ -46,15 +47,18 @@ async function getReports() {
 }
 
 async function saveReportToStorage(report) {
+  await authReady;
   await db.collection('reports').doc(report.id).set(report);
 }
 
 async function getReportById(id) {
+  await authReady;
   var doc = await db.collection('reports').doc(id).get();
   return doc.exists ? doc.data() : null;
 }
 
 async function deleteReportById(id) {
+  await authReady;
   await db.collection('reports').doc(id).delete();
 }
 

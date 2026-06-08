@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /reports/{reportId} {
+
+      // 앱을 통해 로그인한 사용자만 읽기 허용
+      allow read: if request.auth != null;
+
+      // 쓰기: 인증 + 데이터 유효성 검사
+      allow create, update: if request.auth != null && validReport(request.resource.data);
+
+      // 삭제: 인증된 사용자만
+      allow delete: if request.auth != null;
+    }
+  }
+
+  function validReport(data) {
+    return data.keys().hasAll(['id', 'type', 'grade', 'classNum', 'number', 'name', 'createdAt', 'updatedAt'])
+      && data.type in ['결석', '조퇴', '지각', '결과']
+      && data.grade in ['1', '2', '3']
+      && data.classNum in ['1', '2', '3', '4', '5', '6']
+      && data.name is string
+      && data.name.size() > 0
+      && data.name.size() <= 20
+      && data.id is string
+      && data.id.size() > 0;
+  }
+}

@@ -8,7 +8,20 @@ var firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-var db = firebase.firestore();
+var db   = firebase.firestore();
+var auth = firebase.auth();
+
+// 인증 완료까지 기다리는 Promise (Firestore 요청 전에 await)
+var authReady = new Promise(function(resolve) {
+  var unsub = auth.onAuthStateChanged(function(user) {
+    if (user) { unsub(); resolve(user); }
+  });
+});
+
+// 익명 로그인 시작
+auth.signInAnonymously().catch(function(err) {
+  console.error('익명 로그인 실패 — Firebase 콘솔에서 Anonymous 인증을 활성화해 주세요:', err.code);
+});
 
 db.enablePersistence({ synchronizeTabs: true }).catch(function(err) {
   if (err.code !== 'failed-precondition' && err.code !== 'unimplemented') {
