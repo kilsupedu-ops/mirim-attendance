@@ -465,3 +465,31 @@ textarea { resize: vertical; line-height: 1.7; }
   color: var(--text-muted);
   font-size: 0.9rem;
 }
+
+/* ─── DOC PREVIEW OVERLAY ─── */
+#doc-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: #E8EAED;
+  flex-direction: column;
+  display: none;
+}
+.doc-preview-toolbar {
+  background: var(--primary);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  /* iOS Safe Area 대응 */
+  padding-top: max(10px, env(safe-area-inset-top));
+}
+.doc-preview-frame {
+  flex: 1;
+  border: none;
+  background: white;
+  min-height: 0;
+  width: 100%;
+}

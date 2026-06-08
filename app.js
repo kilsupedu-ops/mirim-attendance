@@ -769,7 +769,7 @@ function generateDocumentHTML(data, autoprint, autoDownload) {
     '<div id="preview-actions" style="display:flex;gap:10px;margin-bottom:20px;justify-content:center;flex-wrap:wrap;">',
     '<button onclick="window.print()" style="padding:10px 24px;background:#1565C0;color:white;border:none;border-radius:6px;font-size:1rem;cursor:pointer;font-family:inherit;">인쇄</button>',
     '<button onclick="downloadPDF()" style="padding:10px 24px;background:#37474F;color:white;border:none;border-radius:6px;font-size:1rem;cursor:pointer;font-family:inherit;">PDF 저장</button>',
-    '<button onclick="window.close()" style="padding:10px 24px;background:#ECEFF1;color:#37474F;border:none;border-radius:6px;font-size:1rem;cursor:pointer;font-family:inherit;">닫기</button>',
+    '<button onclick="window.parent.postMessage(\'closePreview\',\'*\')" style="padding:10px 24px;background:#ECEFF1;color:#37474F;border:none;border-radius:6px;font-size:1rem;cursor:pointer;font-family:inherit;">닫기</button>',
     '</div>',
     '<p id="preview-notice" style="text-align:center;font-size:0.82rem;color:#888;margin-bottom:16px;font-family:\'Malgun Gothic\',\'맑은 고딕\',sans-serif;">PDF 저장 시 잠시 기다려주세요.</p>'
   ].join('');
@@ -825,27 +825,62 @@ function generateDocumentHTML(data, autoprint, autoDownload) {
 }
 
 // ====================================================================
+// 문서 미리보기 오버레이 (팝업 없이 동작 — iOS Safari 호환)
+// ====================================================================
+
+function showDocPreview(html) {
+  var overlay = document.getElementById('doc-preview-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'doc-preview-overlay';
+    document.body.appendChild(overlay);
+  }
+
+  overlay.innerHTML =
+    '<div class="doc-preview-toolbar">' +
+      '<button class="btn btn-white" onclick="closeDocPreview()">✕ 닫기</button>' +
+      '<button class="btn btn-white" onclick="printDocPreview()">인쇄</button>' +
+    '</div>' +
+    '<iframe id="doc-preview-frame" class="doc-preview-frame"></iframe>';
+
+  document.getElementById('doc-preview-frame').srcdoc = html;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDocPreview() {
+  var overlay = document.getElementById('doc-preview-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function printDocPreview() {
+  var iframe = document.getElementById('doc-preview-frame');
+  if (iframe && iframe.contentWindow) iframe.contentWindow.print();
+}
+
+window.addEventListener('message', function(e) {
+  if (e.data === 'closePreview') closeDocPreview();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDocPreview();
+});
+
+// ====================================================================
 // PDF 미리보기 / 저장 (폼 화면)
 // ====================================================================
 
 function previewPDF() {
   var data = collectFormData();
   if (!data) return;
-  var html = generateDocumentHTML(data, false);
-  var win = window.open('', '_blank');
-  if (!win) { alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해주세요.'); return; }
-  win.document.write(html);
-  win.document.close();
+  showDocPreview(generateDocumentHTML(data, false));
 }
 
 function savePDF() {
   var data = collectFormData();
   if (!data) return;
-  var html = generateDocumentHTML(data, false, true);
-  var win = window.open('', '_blank');
-  if (!win) { alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해주세요.'); return; }
-  win.document.write(html);
-  win.document.close();
+  showDocPreview(generateDocumentHTML(data, false, true));
 }
 
 // ====================================================================
@@ -883,21 +918,13 @@ function reportToDisplayData(report) {
 async function previewReportById(id) {
   var report = await getReportById(id);
   if (!report) return;
-  var html = generateDocumentHTML(reportToDisplayData(report), false);
-  var win = window.open('', '_blank');
-  if (!win) { alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해주세요.'); return; }
-  win.document.write(html);
-  win.document.close();
+  showDocPreview(generateDocumentHTML(reportToDisplayData(report), false));
 }
 
 async function printReportById(id) {
   var report = await getReportById(id);
   if (!report) return;
-  var html = generateDocumentHTML(reportToDisplayData(report), true);
-  var win = window.open('', '_blank');
-  if (!win) { alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해주세요.'); return; }
-  win.document.write(html);
-  win.document.close();
+  showDocPreview(generateDocumentHTML(reportToDisplayData(report), false));
 }
 
 // ====================================================================
